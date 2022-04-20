@@ -40,11 +40,13 @@ const TextArea = forwardRef<Ref, any>(
 			error,
 			touched,
 			last,
+			initialValue,
 			...otherProps
 		}: {
 			icon: string;
 			error: string | undefined;
 			touched: boolean | undefined;
+			initialValue?: string;
 			last: boolean;
 			otherProps: TextInputProps;
 		},
@@ -79,6 +81,7 @@ const TextArea = forwardRef<Ref, any>(
 						fontFamily: 'Roboto_400Regular',
 					}}
 					ref={ref}
+					value={initialValue}
 					{...otherProps}
 				/>
 			);

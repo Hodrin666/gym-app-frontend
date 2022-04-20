@@ -6,7 +6,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import theme from '../../theme';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FormikErrors } from 'formik/dist/types';
-import { SessionFrom } from './Forms/sessionForm';
+import { SessionFrom } from './Forms/createSessionForm';
 
 /**
  * Interface IProps.

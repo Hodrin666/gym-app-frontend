@@ -9,14 +9,13 @@ import theme from '../../../theme';
 import { Alert, useWindowDimensions, View } from 'react-native';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useMutation, gql, useQuery } from '@apollo/client';
+import { useMutation, gql, useQuery, ApolloQueryResult } from '@apollo/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { RRule } from 'rrule';
 import TextArea from '../TextArea';
 import DropDownPickerComponentTeacher from '../DropDownPickerTeacher';
 import DropDownPickerComponentStudent from '../DropDownPickerStudent';
-import DropDownPickerComponentRepeat from '../DropDownPickerRepeat';
+import { ICard } from '../../screens/addGymClass';
+import { isEqual } from 'lodash';
 
 /**
  * `AndroidMode` type.
@@ -25,10 +24,10 @@ import DropDownPickerComponentRepeat from '../DropDownPickerRepeat';
 type AndroidMode = 'date' | 'time';
 
 /**
- * `SessionFrom` Interface.
+ * `IUpdateSessionForm` Interface.
  */
 
-export interface SessionFrom {
+export interface IUpdateSessionForm {
 	_teacherID: string;
 	date: string;
 	time: string;
@@ -37,12 +36,24 @@ export interface SessionFrom {
 	description: string;
 }
 
+interface IMutationEdit extends IUpdateSessionForm {
+	_id: string;
+}
 /**
  * `IProps` IProps.
  */
 
 interface IProps {
-	setModalOpen: Dispatch<SetStateAction<boolean>>;
+	setModalOpen: Dispatch<SetStateAction<boolean>>[];
+	refetch: (
+		variables?:
+			| Partial<{
+					first: React.Dispatch<React.SetStateAction<number>>;
+			  }>
+			| undefined
+	) => Promise<ApolloQueryResult<any>>;
+	item: ICard;
+	setCardData: React.Dispatch<React.SetStateAction<ICard | undefined>>;
 }
 
 /**
@@ -120,6 +131,30 @@ const CreateSessionText = styled.Text`
 	font-size: 22px;
 `;
 
+const CancelSessionButton = styled.TouchableOpacity`
+	align-self: center;
+	min-height: 63px;
+	max-height: 63px;
+	width: 200px;
+	flex: 1;
+	margin-top: 50px;
+	margin-bottom: 8px;
+	background-color: ${theme.colors.main};
+	color: ${theme.colors.bright};
+	border-radius: ${theme.borderRadius};
+	border: 1px solid black;
+	align-items: center;
+	justify-content: center;
+`;
+/**
+ * `CancelSessionText` styled component.
+ */
+
+const CancelSessionText = styled.Text`
+	color: ${theme.colors.bright};
+	font-size: 22px;
+`;
+
 const AllUsers = gql`
 	query AllUsers {
 		allUsers {
@@ -135,40 +170,40 @@ const AllUsers = gql`
 	}
 `;
 
-const CreateGymClass = gql`
-	mutation CreateGymClass($input: classInput!) {
-		createGymClass(input: $input) {
+const EditGymClassById = gql`
+	mutation EditGymClassById($input: editClassInput!) {
+		editGymClassById(input: $input) {
 			success
 			message
 			class {
-				_id
-				members
-				_teacherID
 				date
-				time
 				description
-				createdAt
-				deletedAt
+				time
+				members
+				teacher {
+					firstName
+					lastName
+				}
 			}
 		}
 	}
 `;
 
 /**
- * `SessionForm` function component.
+ * `UpdateSessionForm` function component.
  */
 
-const SessionForm = (props: IProps): JSX.Element => {
-	const { setModalOpen } = props;
+const UpdateSessionForm = (props: IProps): JSX.Element => {
+	const { setModalOpen, refetch, setCardData, item } = props;
 	const { loading: queryLoading, data: queryData, error } = useQuery(AllUsers);
 	const [openTeacher, setOpenTeacher] = useState(false);
 	const [openStudent, setOpenSudent] = useState(false);
-	const [openRepeat, setOpenRepeat] = useState(false);
-	const [dateText, setDateText] = useState('01/01/2001');
-	const [hourText, setHourText] = useState('01:55');
+	const [dateText, setDateText] = useState(item.date);
+	const [hourText, setHourText] = useState(item.time);
 	const windowHeight = useWindowDimensions().height;
 
 	const [date, setDate] = useState(new Date(1598051730000));
+	const [time, setTime] = useState(new Date(1598051730000));
 	const [mode, setMode] = useState<AndroidMode | undefined>('date');
 	const [show, setShow] = useState(false);
 
@@ -185,25 +220,17 @@ const SessionForm = (props: IProps): JSX.Element => {
 		showMode('time');
 	};
 
-	const initialValues: SessionFrom = {
-		_teacherID: '',
-		date: '',
-		time: '',
-		members: [],
-		repeat: '',
-		description: '',
+	const initialValues: IUpdateSessionForm = {
+		_teacherID: item._teacherID,
+		date: item.date,
+		time: item.time,
+		members: item.members,
+		description: item.description,
 	};
 
-	const validationSchema = Yup.object().shape({
-		_teacherID: Yup.string().required('Required'),
-		date: Yup.string().required('Required'),
-		time: Yup.string().required('Required'),
-		repeat: Yup.string().required('Required'),
-	});
-
-	const [createGymClass, { loading: mutationLoading, data: mutationData }] =
-		useMutation<{ createGymClass: InputMessage }, { input: SessionFrom }>(
-			CreateGymClass
+	const [editGymClassById, { loading: mutationLoading, data: mutationData }] =
+		useMutation<{ editGymClassById: InputMessage }, { input: IMutationEdit }>(
+			EditGymClassById
 		);
 
 	const {
@@ -216,21 +243,13 @@ const SessionForm = (props: IProps): JSX.Element => {
 		touched,
 	} = useFormik({
 		initialValues,
-		validationSchema,
 		onSubmit: async values => {
-			const getCurrentYear = new Date().getFullYear();
-			const day = parseInt(values.date.split('/')[1]);
-			const month = parseInt(values.date.split('/')[0]) - 1;
-			const year = parseInt(`20${values.date.split('/')[2]}`);
-			const hour = parseInt(values.time.split(':')[0]);
-			const minutes = parseInt(values.time.split(':')[1]);
-			const date = new Date(Date.UTC(year, month, day, hour, minutes));
-
-			let dates;
-			if (values.repeat === 'DNR') {
-				createGymClass({
+			if (!isEqual(values, initialValues)) {
+				console.log('Dispara');
+				editGymClassById({
 					variables: {
 						input: {
+							_id: item._id,
 							_teacherID: values._teacherID,
 							members: values.members,
 							date: values.date,
@@ -238,51 +257,22 @@ const SessionForm = (props: IProps): JSX.Element => {
 							description: values.description,
 						},
 					},
-					onCompleted: ({ createGymClass }) => {
-						if (createGymClass.success) {
-							Alert.alert('Class', 'Inserted!', [{ text: 'OK' }]);
+					onCompleted: async ({ editGymClassById }) => {
+						if (editGymClassById.success) {
+							Alert.alert('Class', 'Updated successfully!', [{ text: 'OK' }]);
 						}
 					},
 					onError: error => {
 						console.log('Error: ', error);
 					},
 				});
-			} else if (values.repeat === 'DAILY') {
-				const rule = new RRule({
-					freq: RRule.DAILY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'WEEKLY') {
-				const rule = new RRule({
-					freq: RRule.WEEKLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'MONTHLY') {
-				const rule = new RRule({
-					freq: RRule.MONTHLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'YEARLY') {
-				const rule = new RRule({
-					freq: RRule.YEARLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else {
-				console.log('Date not received');
 			}
-			setModalOpen(false);
+
+			await refetch();
+
+			for (const element of setModalOpen) {
+				element(false);
+			}
 		},
 	});
 
@@ -319,9 +309,10 @@ const SessionForm = (props: IProps): JSX.Element => {
 					<DropDownPickerComponentTeacher
 						queryData={queryData}
 						setFieldValue={setFieldValue}
-						setClose={[setOpenSudent, setOpenRepeat]}
+						setClose={[setOpenSudent]}
 						open={openTeacher}
 						setOpen={setOpenTeacher}
+						initialValue={initialValues._teacherID}
 					/>
 				</DropDownContainer>
 
@@ -348,31 +339,42 @@ const SessionForm = (props: IProps): JSX.Element => {
 					<DropDownPickerComponentStudent
 						queryData={queryData}
 						setFieldValue={setFieldValue}
-						setClose={[setOpenTeacher, setOpenRepeat]}
+						setClose={[setOpenTeacher]}
 						open={openStudent}
 						setOpen={setOpenSudent}
+						initialValue={initialValues.members}
 					/>
 				</DropDownContainer>
 
-				<DropDownContainer>
-					<DropDownPickerComponentRepeat
-						setFieldValue={setFieldValue}
-						setClose={[setOpenTeacher, setOpenTeacher]}
-						open={openRepeat}
-						setOpen={setOpenRepeat}
-					/>
-				</DropDownContainer>
+				<TextArea
+					onChangeText={handleChange('description')}
+					initialValue={initialValues.description}
+				/>
 
-				<TextArea onChangeText={handleChange('description')} />
-
-				<CreateSessionButton onPress={() => handleSubmit()}>
+				<CreateSessionButton
+					onPress={() => {
+						handleSubmit();
+						setCardData(undefined);
+					}}
+				>
 					<CreateSessionText>
 						{mutationLoading ? 'Loading ' : 'Create Session'}
 					</CreateSessionText>
 				</CreateSessionButton>
+
+				<CancelSessionButton
+					onPress={() => {
+						setCardData(undefined);
+						for (const element of setModalOpen) {
+							element(false);
+						}
+					}}
+				>
+					<CancelSessionText>{'Cancel session'}</CancelSessionText>
+				</CancelSessionButton>
 			</View>
 		);
 	}
 };
 
-export default SessionForm;
+export default UpdateSessionForm;
