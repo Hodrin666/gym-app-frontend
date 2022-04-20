@@ -2,12 +2,21 @@
  * Module dependencies.
  */
 
+import AppLoading from 'expo-app-loading';
+import {
+	useFonts,
+	Roboto_400Regular,
+	Roboto_700Bold,
+} from '@expo-google-fonts/roboto';
 import React from 'react';
-import { GestureResponderEvent, Text, View } from 'react-native';
-import styled, { css } from 'styled-components/native';
+import { Alert } from 'react-native';
+import styled from 'styled-components/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { ifProp } from 'styled-tools';
 import theme from '../../theme';
 import { ICard } from '../screens/addGymClass';
+import * as Type from '../Types';
+import { ApolloQueryResult, gql, useMutation } from '@apollo/client';
 
 /**
  * `IProps` interface.
@@ -18,6 +27,30 @@ interface IProps {
 	last: boolean;
 	setOpenEditModal: React.Dispatch<React.SetStateAction<boolean>>[];
 	setCardData: React.Dispatch<React.SetStateAction<ICard | undefined>>;
+	refetch: (
+		variables?:
+			| Partial<{
+					first: React.Dispatch<React.SetStateAction<number>>;
+			  }>
+			| undefined
+	) => Promise<ApolloQueryResult<any>>;
+}
+
+/**
+ * `IInputMessage` interface.
+ */
+
+interface IInputDeleteMessage {
+	success: string;
+	message: string;
+}
+
+/**
+ * `IInputDelete` interface.
+ */
+
+interface IInputDelete {
+	_id: string;
 }
 
 /**
@@ -67,7 +100,7 @@ const ProfileImageWrapper = styled.View`
  * `StyledText` styled component.
  */
 
-const StyledText = styled.Text`
+const StyledText = styled(Type.Regular)`
 	color: ${theme.colors.bright};
 `;
 
@@ -90,11 +123,77 @@ const ClassDateLimitWrapper = styled.View`
 `;
 
 /**
+ * `DeleteIcon` styled component.
+ */
+
+const DeleteIcon = styled(MaterialIcons).attrs({
+	size: 30,
+	name: 'delete',
+})`
+	color: ${theme.colors.error};
+`;
+
+/**
+ * `IconWrapper` styled component.
+ */
+
+const IconWrapper = styled.TouchableOpacity`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 16px;
+`;
+
+const DeleteMutation = gql`
+	mutation DeleteClassById($input: classDeleteInput!) {
+		deleteClassById(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+/**
  * `Card` function component.
  */
 
 const Card = (props: IProps): JSX.Element => {
-	const { item, last, setOpenEditModal, setCardData } = props;
+	const { item, last, setOpenEditModal, setCardData, refetch } = props;
+
+	const [fontsLoaded] = useFonts({
+		Roboto_400Regular,
+		Roboto_700Bold,
+	});
+
+	const [deleteClassById, { loading, data }] = useMutation<
+		{ deleteClassById: IInputDeleteMessage },
+		{ input: IInputDelete }
+	>(DeleteMutation);
+
+	const onDelete = async () => {
+		await deleteClassById({
+			variables: {
+				input: {
+					_id: item._id,
+				},
+			},
+			onCompleted: async ({ deleteClassById }) => {
+				if (deleteClassById.success) {
+					Alert.alert('Class', 'Deleted successfully!', [{ text: 'OK' }]);
+				}
+			},
+			onError: error => {
+				console.log('Error: ', error);
+			},
+		});
+
+		await refetch();
+	};
+
+	if (!fontsLoaded) {
+		return <AppLoading />;
+	}
+
 	return (
 		<CardWrapper
 			last
@@ -106,12 +205,19 @@ const Card = (props: IProps): JSX.Element => {
 		>
 			<ProfessorWrapper>
 				<ProfileImageWrapper />
+
 				<StyledText>{`${item.teacher.firstName} ${item.teacher.lastName}`}</StyledText>
 			</ProfessorWrapper>
+
 			<ClassDateLimitWrapper>
 				<StyledText>{`${item.date} ${item.time}`}</StyledText>
+
 				<StyledTextLimit>{`${item.members.length}/10`}</StyledTextLimit>
 			</ClassDateLimitWrapper>
+
+			<IconWrapper onPress={onDelete}>
+				<DeleteIcon />
+			</IconWrapper>
 		</CardWrapper>
 	);
 };
