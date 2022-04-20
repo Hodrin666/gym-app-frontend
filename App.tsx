@@ -57,7 +57,7 @@ const requestRefreshToken = async (): Promise<any> => {
 
 	try {
 		const response = await axios.post(
-			'https://c24a-2a01-388-438-150-00-1-1e.ngrok.io/refresh_token',
+			'https://53a6-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
 			{},
 			{
 				headers,
@@ -139,11 +139,11 @@ const errorLink = onError(
 );
 
 const link = createUploadLink({
-	uri: 'https://c24a-2a01-388-438-150-00-1-1e.ngrok.io/graphql',
+	uri: 'https://53a6-2a01-388-438-110-00-1-11.ngrok.io/graphql',
 });
 
 const client = new ApolloClient({
-	link: ApolloLink.from([errorLink, authLink as unknown as ApolloLink, link]),
+	link: ApolloLink.from([authLink as unknown as ApolloLink, errorLink, link]),
 	cache: new InMemoryCache(),
 });
 
