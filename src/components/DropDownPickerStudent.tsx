@@ -6,7 +6,8 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import theme from '../../theme';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FormikErrors } from 'formik/dist/types';
-import { SessionFrom } from './Forms/sessionForm';
+import { SessionFrom } from './Forms/createSessionForm';
+import { isEqual, isNil } from 'lodash';
 
 /**
  * Interface IProps.
@@ -23,6 +24,7 @@ interface IProps<T> {
 	setOpen: Dispatch<SetStateAction<boolean>>;
 	setClose: Dispatch<SetStateAction<boolean>>[];
 	onChange?: (e: T | React.ChangeEvent<any>) => void;
+	initialValue?: string[];
 }
 
 /**
@@ -30,8 +32,12 @@ interface IProps<T> {
  */
 
 const DropDownPickerComponentStudent = (props: IProps<any>): JSX.Element => {
-	const { open, setOpen, setClose, setFieldValue, queryData } = props;
-	const [valueStudent, setValueStudent] = useState([]);
+	const { open, setOpen, setClose, setFieldValue, queryData, initialValue } =
+		props;
+	const [valueStudent, setValueStudent] = useState(
+		isNil(initialValue) ? [] : initialValue
+	);
+	console.log('valueStudent: ', valueStudent);
 	const [itemsStudent, setItemsStudent] = useState([{}]);
 
 	useEffect(() => {
