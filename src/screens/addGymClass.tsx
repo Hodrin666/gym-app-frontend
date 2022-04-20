@@ -7,10 +7,7 @@ import {
 	Alert,
 	useWindowDimensions,
 	ActivityIndicator,
-	Text,
 	VirtualizedList,
-	View,
-	SafeAreaView,
 } from 'react-native';
 import { IStackScreenProps } from '../library/StackScreenProps';
 import React, { useContext, useEffect, useState } from 'react';
@@ -57,22 +54,6 @@ const Container = styled.View`
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-`;
-
-/**
- * `ModalWindow` styled component.
- */
-
-const ModalWindow = styled.View`
-	display: flex;
-	background-color: purple;
-	position: absolute;
-	margin: 50px 28px;
-	top: 40px;
-	left: 28px;
-	right: 28px;
-	height: 200px;
-	justify-content: center;
 `;
 
 /**
@@ -202,6 +183,7 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 										last
 										setOpenEditModal={[setOpenEditModal, setModalVisible]}
 										setCardData={setCardData}
+										refetch={refetch}
 									/>
 								);
 							} else {
@@ -211,6 +193,7 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 										last={false}
 										setOpenEditModal={[setOpenEditModal, setModalVisible]}
 										setCardData={setCardData}
+										refetch={refetch}
 									/>
 								);
 							}
