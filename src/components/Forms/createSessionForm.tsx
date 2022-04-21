@@ -18,7 +18,6 @@ import DropDownPickerComponentTeacher from '../DropDownPickerTeacher';
 import DropDownPickerComponentStudent from '../DropDownPickerStudent';
 import DropDownPickerComponentRepeat from '../DropDownPickerRepeat';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { AllClasses } from '../../screens/addGymClass';
 
 /**
  * `AndroidMode` type.
@@ -341,7 +340,7 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 	};
 
 	if (error) {
-		console.log('gg', error);
+		console.log('Error: ', error);
 	}
 
 	if (queryLoading) {
