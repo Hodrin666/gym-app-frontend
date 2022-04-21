@@ -37,7 +37,6 @@ const DropDownPickerComponentStudent = (props: IProps<any>): JSX.Element => {
 	const [valueStudent, setValueStudent] = useState(
 		isNil(initialValue) ? [] : initialValue
 	);
-	console.log('valueStudent: ', valueStudent);
 	const [itemsStudent, setItemsStudent] = useState([{}]);
 
 	useEffect(() => {

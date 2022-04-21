@@ -26,6 +26,7 @@ import SessionForm from '../components/Forms/createSessionForm';
 import { gql, useQuery } from '@apollo/client';
 import Card from '../components/Card';
 import UpdateSessionForm from '../components/Forms/updateSessionForm';
+import { CardName } from '../../types/appEnum';
 
 /**
  * `Card` interface
@@ -108,7 +109,7 @@ const CardContainer = styled.SafeAreaView`
 	flex: 1;
 `;
 
-export const AllClasses = gql`
+const AllClasses = gql`
 	query AllClasses($first: Int) {
 		allClasses(first: $first) {
 			_id
@@ -159,7 +160,6 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 	const windowHeight = useWindowDimensions().height;
 
 	if (loading) {
-		console.log('Loading =>', loading);
 		return <ActivityIndicator />;
 	}
 
@@ -184,6 +184,7 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 										setOpenEditModal={[setOpenEditModal, setModalVisible]}
 										setCardData={setCardData}
 										refetch={refetch}
+										cardName={CardName.ADMIN}
 									/>
 								);
 							} else {
@@ -194,6 +195,7 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 										setOpenEditModal={[setOpenEditModal, setModalVisible]}
 										setCardData={setCardData}
 										refetch={refetch}
+										cardName={CardName.ADMIN}
 									/>
 								);
 							}

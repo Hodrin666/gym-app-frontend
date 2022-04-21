@@ -36,7 +36,11 @@ export interface IUpdateSessionForm {
 	description: string;
 }
 
-interface IMutationEdit extends IUpdateSessionForm {
+/**
+ * Export `IMutationEdit` interface.
+ */
+
+export interface IMutationEdit extends IUpdateSessionForm {
 	_id: string;
 }
 /**
@@ -57,10 +61,10 @@ interface IProps {
 }
 
 /**
- * Interface `InputMessage`.
+ * Export `InputMessage` interface.
  */
 
-interface InputMessage {
+export interface InputMessage {
 	success: boolean;
 	message: string;
 	class: {
@@ -245,7 +249,6 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 		initialValues,
 		onSubmit: async values => {
 			if (!isEqual(values, initialValues)) {
-				console.log('Dispara');
 				editGymClassById({
 					variables: {
 						input: {
@@ -297,7 +300,7 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 	};
 
 	if (error) {
-		console.log('gg', error);
+		console.log('Error', error);
 	}
 
 	if (queryLoading) {

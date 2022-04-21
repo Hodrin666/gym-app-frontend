@@ -57,7 +57,7 @@ const requestRefreshToken = async (): Promise<any> => {
 
 	try {
 		const response = await axios.post(
-			'https://53a6-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
+			'https://152a-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
 			{},
 			{
 				headers,
@@ -92,13 +92,11 @@ const errorLink = onError(
 					// when an AuthenticationError is thrown in a resolver
 
 					case 'Expired_Token':
-						console.log('Im here');
 						// Modify the operation context with a new token
 
 						return new Observable(observer => {
 							requestRefreshToken()
 								.then(refreshResponse => {
-									console.log('da', refreshResponse.accessToken);
 									operation.setContext(({ headers = {} }) => ({
 										headers: {
 											// Re-add old headers
@@ -139,7 +137,7 @@ const errorLink = onError(
 );
 
 const link = createUploadLink({
-	uri: 'https://53a6-2a01-388-438-110-00-1-11.ngrok.io/graphql',
+	uri: 'https://152a-2a01-388-438-110-00-1-11.ngrok.io/graphql',
 });
 
 const client = new ApolloClient({

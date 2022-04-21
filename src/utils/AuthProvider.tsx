@@ -6,7 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  */
 
 type User = {
-	member: any;
+	member: {
+		_id: string;
+		firstName: string;
+		role: string;
+	};
 	accessToken?: string;
 	refreshToken?: string;
 } | null;

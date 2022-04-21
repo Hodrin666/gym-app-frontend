@@ -76,8 +76,13 @@ const MainNavbar: React.FunctionComponent<IProps> = props => {
 	return (
 		<MainNavbarContainer>
 			<Divider />
-			<Icon name={'calendar-alt'} size={40} />
+
+			<IconContainer onPress={() => navigation.navigate('MemberCalendar')}>
+				<Icon name={'calendar-alt'} size={40} />
+			</IconContainer>
+
 			<Icon name={'dumbbell'} size={40} />
+
 			<IconContainer onPress={() => navigation.navigate('TeacherCalendar')}>
 				<Icon name={'calendar-plus'} size={40} />
 			</IconContainer>
