@@ -8,21 +8,27 @@ import {
 	Roboto_400Regular,
 	Roboto_700Bold,
 } from '@expo-google-fonts/roboto';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
 import styled from 'styled-components/native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { ifProp } from 'styled-tools';
 import theme from '../../theme';
 import { ICard } from '../screens/addGymClass';
 import * as Type from '../Types';
 import { ApolloQueryResult, gql, useMutation } from '@apollo/client';
+import { BookingType, CardName } from '../../types/appEnum';
+import { AuthContext } from '../utils/AuthProvider';
+import { useState } from 'react';
+import { IMutationEdit, InputMessage } from './Forms/updateSessionForm';
+import { find } from 'lodash';
 
 /**
  * `IProps` interface.
  */
 
 interface IProps {
+	cardName: CardName;
 	item: ICard;
 	last: boolean;
 	setOpenEditModal: React.Dispatch<React.SetStateAction<boolean>>[];
@@ -123,14 +129,13 @@ const ClassDateLimitWrapper = styled.View`
 `;
 
 /**
- * `DeleteIcon` styled component.
+ * `Icon` styled component.
  */
 
-const DeleteIcon = styled(MaterialIcons).attrs({
-	size: 30,
-	name: 'delete',
-})`
-	color: ${theme.colors.error};
+const Icon = styled(FontAwesome5).attrs({
+	size: 25,
+})<{ hasBooked?: boolean }>`
+	transform: ${ifProp({ hasBooked: true }, 'rotate(45deg)', 'rotate(0deg)')};
 `;
 
 /**
@@ -144,6 +149,10 @@ const IconWrapper = styled.TouchableOpacity`
 	margin-left: 16px;
 `;
 
+/**
+ * DeleteMutation Mutation.
+ */
+
 const DeleteMutation = gql`
 	mutation DeleteClassById($input: classDeleteInput!) {
 		deleteClassById(input: $input) {
@@ -154,11 +163,52 @@ const DeleteMutation = gql`
 `;
 
 /**
+ * EditGymClassById Mutation.
+ */
+
+const EditGymClassById = gql`
+	mutation EditGymClassById($input: editClassInput!) {
+		editGymClassById(input: $input) {
+			success
+			message
+			class {
+				date
+				description
+				time
+				members
+				teacher {
+					firstName
+					lastName
+				}
+			}
+		}
+	}
+`;
+
+/**
  * `Card` function component.
  */
 
 const Card = (props: IProps): JSX.Element => {
-	const { item, last, setOpenEditModal, setCardData, refetch } = props;
+	const { item, last, setOpenEditModal, setCardData, refetch, cardName } =
+		props;
+	const [hasBooked, setHasBooked] = useState<boolean>(false);
+
+	const { userAuth } = useContext(AuthContext);
+
+	const checkBooking = (members: string[], member: string): boolean => {
+		for (const element of members) {
+			if (element === member) return true;
+		}
+		return false;
+	};
+
+	useEffect(() => {
+		if (userAuth?.member._id) {
+			const hasBooked = checkBooking(item.members, userAuth.member._id);
+			setHasBooked(hasBooked);
+		}
+	}, []);
 
 	const [fontsLoaded] = useFonts({
 		Roboto_400Regular,
@@ -190,16 +240,71 @@ const Card = (props: IProps): JSX.Element => {
 		await refetch();
 	};
 
+	const [editGymClassById, { loading: mutationLoading, data: mutationData }] =
+		useMutation<{ editGymClassById: InputMessage }, { input: IMutationEdit }>(
+			EditGymClassById
+		);
+
+	const onBookingType = async (type: BookingType) => {
+		let members = item.members;
+
+		if (type === BookingType.UNBOOK && userAuth?.member._id) {
+			let newBookingIds: any[] = [];
+			members.filter((value, index) => {
+				if (value != userAuth?.member._id) {
+					newBookingIds = [...newBookingIds, value];
+				}
+			});
+			members = newBookingIds;
+		}
+
+		if (type === BookingType.BOOK && userAuth?.member._id) {
+			members = [...item.members, userAuth?.member._id];
+			console.log('booking', members);
+		}
+
+		editGymClassById({
+			variables: {
+				input: {
+					_id: item._id,
+					_teacherID: item._teacherID,
+					members: members,
+					date: item.date,
+					time: item.time,
+					description: item.description,
+				},
+			},
+			onCompleted: async ({ editGymClassById }) => {
+				console.log('class', editGymClassById.class);
+				if (editGymClassById.success && type === BookingType.UNBOOK) {
+					setHasBooked(false);
+					Alert.alert('Class', 'Booking removed!', [{ text: 'OK' }]);
+				} else {
+					setHasBooked(true);
+					Alert.alert('Class', 'Booked successfully!', [{ text: 'OK' }]);
+				}
+			},
+			onError: error => {
+				console.log('Error: ', error);
+			},
+		});
+
+		await refetch();
+	};
+
 	if (!fontsLoaded) {
 		return <AppLoading />;
 	}
 
 	return (
 		<CardWrapper
-			last
+			last={last}
 			onPress={() => {
-				setOpenEditModal[0](true);
-				setOpenEditModal[1](true);
+				if (setOpenEditModal.length > 0) {
+					for (const elements of setOpenEditModal) {
+						elements(true);
+					}
+				}
 				setCardData(item);
 			}}
 		>
@@ -215,9 +320,27 @@ const Card = (props: IProps): JSX.Element => {
 				<StyledTextLimit>{`${item.members.length}/10`}</StyledTextLimit>
 			</ClassDateLimitWrapper>
 
-			<IconWrapper onPress={onDelete}>
-				<DeleteIcon />
-			</IconWrapper>
+			{cardName === CardName.ADMIN ? (
+				<IconWrapper onPress={onDelete}>
+					<Icon name="trash" color={theme.colors.error} />
+				</IconWrapper>
+			) : hasBooked ? (
+				<IconWrapper onPress={() => onBookingType(BookingType.UNBOOK)}>
+					<Icon
+						name="plus-circle"
+						color={theme.colors.error}
+						hasBooked={true}
+					/>
+				</IconWrapper>
+			) : (
+				<IconWrapper onPress={() => onBookingType(BookingType.BOOK)}>
+					<Icon
+						name="plus-circle"
+						color={theme.colors.blue}
+						hasBooked={false}
+					/>
+				</IconWrapper>
+			)}
 		</CardWrapper>
 	);
 };
