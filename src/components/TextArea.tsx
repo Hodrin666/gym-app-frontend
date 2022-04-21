@@ -81,7 +81,7 @@ const TextArea = forwardRef<Ref, any>(
 						fontFamily: 'Roboto_400Regular',
 					}}
 					ref={ref}
-					value={initialValue}
+					defaultValue={initialValue}
 					{...otherProps}
 				/>
 			);
