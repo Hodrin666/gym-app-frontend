@@ -15,28 +15,24 @@ import { onError } from '@apollo/client/link/error';
 import AppLoading from 'expo-app-loading';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from 'styled-components/native';
-import theme from './theme';
+import theme from '../theme';
 import { Text, useWindowDimensions } from 'react-native';
 import {
 	useFonts,
 	Roboto_400Regular,
 	Roboto_700Bold,
 } from '@expo-google-fonts/roboto';
-import Login from './src/screens/login';
-import Register from './src/screens/register';
+import Login from './screens/login';
+import Register from './screens/register';
 import { createStackNavigator } from '@react-navigation/stack';
-import routes from './src/config/routes';
-import { AuthContext, AuthProvider } from './src/utils/AuthProvider';
+import routes from './config/routes';
+import { AuthContext, AuthProvider } from './utils/AuthProvider';
 import { FC, useContext, useEffect, useState } from 'react';
-import Navigation from './src/components/Navigation';
+import Navigation from './components/Navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setContext } from 'apollo-link-context';
 import { createUploadLink } from 'apollo-upload-client';
 import { assertValidExecutionArguments } from 'graphql/execution/execute';
-
-//uk - http://100.89.10.29:4000/graphql
-//iBase - http://192.168.31.36:4000/graphql
-//ze -  http://192.168.68.120:4000/graphql
 
 const getData = async () => {
 	try {
@@ -57,7 +53,7 @@ const requestRefreshToken = async (): Promise<any> => {
 
 	try {
 		const response = await axios.post(
-			'https://152a-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
+			'https://f6c1-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
 			{},
 			{
 				headers,
@@ -137,7 +133,7 @@ const errorLink = onError(
 );
 
 const link = createUploadLink({
-	uri: 'https://152a-2a01-388-438-110-00-1-11.ngrok.io/graphql',
+	uri: 'https://f6c1-2a01-388-438-110-00-1-11.ngrok.io/graphql',
 });
 
 const client = new ApolloClient({
