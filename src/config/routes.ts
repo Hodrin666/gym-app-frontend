@@ -8,6 +8,7 @@ import RegisterScreen from '../screens/register';
 import HomeScreen from '../screens/home';
 import AddGymClass from '../screens/addGymClass';
 import MemberCalendar from '../screens/memberCalendar';
+import Profile from '../screens/profile';
 
 /**
  * Page auth `routes`.
@@ -40,6 +41,10 @@ export const landingRoutes: IRouteProps[] = [
 	{
 		name: 'MemberCalendar',
 		component: MemberCalendar,
+	},
+	{
+		name: 'Profile',
+		component: Profile,
 	},
 ];
 

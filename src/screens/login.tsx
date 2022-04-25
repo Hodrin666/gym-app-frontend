@@ -151,6 +151,7 @@ const Login: React.FunctionComponent<IStackScreenProps> = props => {
 
 			<TextInput
 				textContentType="emailAddress"
+				icon={'user-alt'}
 				onBlur={handleBlur('email')}
 				error={errors.email}
 				touched={touched.email}

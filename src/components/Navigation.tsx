@@ -14,7 +14,7 @@ const Stack = createStackNavigator();
  * `Navigation` function component.
  */
 
-const Navigation = (): JSX.Element => {
+const Navigation = (): any => {
 	const { userAuth } = useContext(AuthContext);
 
 	return (

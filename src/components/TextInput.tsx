@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { TextInput as RNTextInput, TextInputProps } from 'react-native';
-import { Entypo, Ionicons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import theme from '../../theme';
 import styled from 'styled-components/native';
 import { ifProp } from 'styled-tools';
@@ -22,18 +22,10 @@ const InputContainer = styled.View<{ last?: boolean }>`
 `;
 
 /**
- * `InputEmailIcon` styled component.
+ * `Icon` styled component.
  */
 
-const InputEmailIcon = styled(Ionicons)`
-	padding: 10px;
-`;
-
-/**
- * `InputPasswordIcon` styled component.
- */
-
-const InputPasswordIcon = styled(Entypo)`
+const Icon = styled(FontAwesome5)`
 	padding: 10px;
 `;
 
@@ -83,15 +75,7 @@ const TextInput = forwardRef<Ref, any>(
 		return (
 			<>
 				<InputContainer last={last}>
-					{icon === 'lock' ? (
-						<InputPasswordIcon name={icon} size={24} color={validationColor} />
-					) : (
-						<InputEmailIcon
-							name={'mail-outline'}
-							size={24}
-							color={validationColor}
-						/>
-					)}
+					<Icon name={icon} size={24} color={validationColor} />
 
 					<Input
 						placeholderTextColor="rgba(34, 62, 75, 0.7)"

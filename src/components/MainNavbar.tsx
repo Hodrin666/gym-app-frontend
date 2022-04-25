@@ -56,16 +56,6 @@ const Icon = styled(FontAwesome5)`
 `;
 
 /**
- * IconContainer styled component.
- */
-
-const IconContainer = styled(TouchableOpacity)`
-	color: black;
-	height: 40px;
-	width: 40px;
-`;
-
-/**
  * `MainNavbar` function component.
  */
 
@@ -77,15 +67,17 @@ const MainNavbar: React.FunctionComponent<IProps> = props => {
 		<MainNavbarContainer>
 			<Divider />
 
-			<IconContainer onPress={() => navigation.navigate('MemberCalendar')}>
+			<TouchableOpacity onPress={() => navigation.navigate('MemberCalendar')}>
 				<Icon name={'calendar-alt'} size={40} />
-			</IconContainer>
+			</TouchableOpacity>
 
-			<Icon name={'dumbbell'} size={40} />
+			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
+				<Icon name={'dumbbell'} size={40} />
+			</TouchableOpacity>
 
-			<IconContainer onPress={() => navigation.navigate('TeacherCalendar')}>
+			<TouchableOpacity onPress={() => navigation.navigate('TeacherCalendar')}>
 				<Icon name={'calendar-plus'} size={40} />
-			</IconContainer>
+			</TouchableOpacity>
 		</MainNavbarContainer>
 	);
 };
