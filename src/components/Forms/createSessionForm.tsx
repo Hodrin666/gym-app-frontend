@@ -152,7 +152,7 @@ const CancelSessionText = styled.Text`
 	font-size: 22px;
 `;
 
-const AllUsers = gql`
+export const AllUsers = gql`
 	query AllUsers {
 		allUsers {
 			firstName
@@ -192,7 +192,13 @@ const CreateGymClass = gql`
 
 const CreateSessionForm = (props: IProps): JSX.Element => {
 	const { setModalOpen, refetch } = props;
-	const { loading: queryLoading, data: queryData, error } = useQuery(AllUsers);
+	const {
+		loading: queryLoading,
+		data: queryData,
+		error,
+	} = useQuery(AllUsers, {
+		fetchPolicy: 'network-only',
+	});
 	const [openTeacher, setOpenTeacher] = useState(false);
 	const [openStudent, setOpenSudent] = useState(false);
 	const [openRepeat, setOpenRepeat] = useState(false);
