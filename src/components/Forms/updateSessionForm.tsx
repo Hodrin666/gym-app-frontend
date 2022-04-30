@@ -199,7 +199,13 @@ const EditGymClassById = gql`
 
 const UpdateSessionForm = (props: IProps): JSX.Element => {
 	const { setModalOpen, refetch, setCardData, item } = props;
-	const { loading: queryLoading, data: queryData, error } = useQuery(AllUsers);
+	const {
+		loading: queryLoading,
+		data: queryData,
+		error,
+	} = useQuery(AllUsers, {
+		fetchPolicy: 'network-only',
+	});
 	const [openTeacher, setOpenTeacher] = useState(false);
 	const [openStudent, setOpenSudent] = useState(false);
 	const [dateText, setDateText] = useState(item.date);
