@@ -125,6 +125,9 @@ const ImageWrapper = styled.TouchableOpacity`
 	background-color: ${theme.colors.secondary};
 	border-radius: 63px;
 	left: ${Math.round(width / 2) - 63}px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
 
 /**
@@ -136,6 +139,15 @@ const ProfileImage = styled(Image)`
 	height: 126px;
 	border-radius: 63px;
 	border: 3px ${theme.colors.bright};
+`;
+
+/**
+ * `LoadingContainer` styled component.
+ */
+
+const LoadingContainer = styled(ActivityIndicator)`
+	width: 126px;
+	height: 126px;
 `;
 
 /**
@@ -227,6 +239,7 @@ const Profile: React.FunctionComponent<IStackScreenProps> = props => {
 	if (loading) {
 		return <AppLoading />;
 	} else {
+		console.log('not loading ==>');
 		return (
 			<ProfileContainer>
 				<StatusBar backgroundColor={theme.colors.blue} />
@@ -244,17 +257,24 @@ const Profile: React.FunctionComponent<IStackScreenProps> = props => {
 
 				<ImageContainer>
 					<ImageWrapper onPress={onChangeImage}>
-						{data.getProfileImage.hasImage ? (
+						{mutationLoading ? (
+							<LoadingContainer color={theme.colors.blue} />
+						) : data.getProfileImage.hasImage ? (
 							<ProfileImage source={{ uri: data.getProfileImage.url }} />
 						) : (
 							<NoProfileImage />
 						)}
+						{/* {data.getProfileImage.hasImage ? (
+							<ProfileImage source={{ uri: data.getProfileImage.url }} />
+						) : (
+							<NoProfileImage />
+						)} */}
 					</ImageWrapper>
 
 					<Liner />
 				</ImageContainer>
 
-				<UserProfileForm userData={data.getUserById} />
+				<UserProfileForm userData={data.getUserById} refetch={refetch} />
 			</ProfileContainer>
 		);
 	}

@@ -344,7 +344,7 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 	}
 
 	if (queryLoading) {
-		return <AppLoading />;
+		return <View />;
 	} else {
 		return (
 			<View>

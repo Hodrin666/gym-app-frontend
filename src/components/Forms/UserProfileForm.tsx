@@ -46,6 +46,14 @@ export interface IMutationEdit extends IUpdateProfile {
 
 interface IProps {
 	userData: IUpdateProfile;
+	refetch: (
+		variables?:
+			| Partial<{
+					id: string | undefined;
+					name: string | undefined;
+			  }>
+			| undefined
+	) => Promise<ApolloQueryResult<any>>;
 }
 
 /**
@@ -106,7 +114,7 @@ const UpdateUser = gql`
 
 const UpdateSessionForm = (props: IProps): JSX.Element => {
 	const { userAuth } = useContext(AuthContext);
-	const { userData } = props;
+	const { userData, refetch } = props;
 	const lastNameRef = useRef<any>(null);
 	const contactRef = useRef<any>(null);
 
@@ -144,6 +152,7 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 										{ text: 'OK' },
 									]);
 								}
+								await refetch();
 							},
 							onError: error => {
 								console.log('Error: ', error);

@@ -53,7 +53,7 @@ const requestRefreshToken = async (): Promise<any> => {
 
 	try {
 		const response = await axios.post(
-			'https://f6c1-2a01-388-438-110-00-1-11.ngrok.io/refresh_token',
+			'http://100.89.10.120:4000/refresh_token',
 			{},
 			{
 				headers,
@@ -73,7 +73,7 @@ const authLink = setContext(async (_, previousContext) => {
 	return {
 		headers: {
 			...headers,
-			authorization: token ? `Bearer ${token?.accessToken}` : '', //your custom header
+			authorization: token ? `Bearer ${token?.accessToken}` : '', //header
 		},
 	};
 });
@@ -133,7 +133,7 @@ const errorLink = onError(
 );
 
 const link = createUploadLink({
-	uri: 'https://f6c1-2a01-388-438-110-00-1-11.ngrok.io/graphql',
+	uri: 'http://100.89.10.120:4000/graphql',
 });
 
 const client = new ApolloClient({

@@ -124,7 +124,7 @@ const TitleHighlighted = styled(Title)`
 `;
 
 /**
- * GetProfileImage query
+ * Get Profile Image query
  */
 
 const GetProfileImage = gql`
