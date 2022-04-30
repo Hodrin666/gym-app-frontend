@@ -16,12 +16,12 @@ import { ifProp } from 'styled-tools';
 import theme from '../../theme';
 import { ICard } from '../screens/addGymClass';
 import * as Type from '../Types';
-import { ApolloQueryResult, gql, useMutation } from '@apollo/client';
+import { ApolloQueryResult, gql, useMutation, useQuery } from '@apollo/client';
 import { BookingType, CardName } from '../../types/appEnum';
 import { AuthContext } from '../utils/AuthProvider';
 import { useState } from 'react';
 import { IMutationEdit, InputMessage } from './Forms/updateSessionForm';
-import { find } from 'lodash';
+import NoImage from '../../assets/user.svg';
 
 /**
  * `IProps` interface.
@@ -100,6 +100,17 @@ const ProfileImageWrapper = styled.View`
 	border-radius: 24px;
 	border: 1px solid ${theme.colors.bright};
 	margin-right: 12px;
+	overflow: hidden;
+`;
+
+/**
+ * `ProfileImage` styled component.
+ */
+
+const ProfileImage = styled.Image`
+	height: 48px;
+	width: 48px;
+	border-radius: 24px;
 `;
 
 /**
@@ -126,6 +137,17 @@ const StyledTextLimit = styled(StyledText)`
 const ClassDateLimitWrapper = styled.View`
 	display: flex;
 	flex-direction: column;
+`;
+
+/**
+ * `NoProfileImage` styled component.
+ */
+
+const NoProfileImage = styled(NoImage)`
+	color: ${theme.colors.bright};
+	height: 48px;
+	width: 48px;
+	margin-right: 12px;
 `;
 
 /**
@@ -186,6 +208,19 @@ const EditGymClassById = gql`
 `;
 
 /**
+ * Get profile image query.
+ */
+
+const GetProfileImage = gql`
+	query GetProfileImage($name: String!) {
+		getProfileImage(name: $name) {
+			hasImage
+			url
+		}
+	}
+`;
+
+/**
  * `Card` function component.
  */
 
@@ -193,6 +228,10 @@ const Card = (props: IProps): JSX.Element => {
 	const { item, last, setOpenEditModal, setCardData, refetch, cardName } =
 		props;
 	const [hasBooked, setHasBooked] = useState<boolean>(false);
+
+	const { loading: loadingImage, data: dataImage } = useQuery(GetProfileImage, {
+		variables: { name: item._teacherID },
+	});
 
 	const { userAuth } = useContext(AuthContext);
 
@@ -296,53 +335,66 @@ const Card = (props: IProps): JSX.Element => {
 		return <AppLoading />;
 	}
 
-	return (
-		<CardWrapper
-			last={last}
-			onPress={() => {
-				if (setOpenEditModal.length > 0) {
-					for (const elements of setOpenEditModal) {
-						elements(true);
+	if (loadingImage) {
+		return <AppLoading />;
+	} else {
+		console.log('hello', dataImage);
+		return (
+			<CardWrapper
+				last={last}
+				onPress={() => {
+					if (setOpenEditModal.length > 0) {
+						for (const elements of setOpenEditModal) {
+							elements(true);
+						}
 					}
-				}
-				setCardData(item);
-			}}
-		>
-			<ProfessorWrapper>
-				<ProfileImageWrapper />
+					setCardData(item);
+				}}
+			>
+				<ProfessorWrapper>
+					{dataImage.getProfileImage.hasImage ? (
+						<ProfileImageWrapper>
+							<ProfileImage source={{ uri: dataImage.getProfileImage.url }} />
+						</ProfileImageWrapper>
+					) : (
+						<NoProfileImage />
+					)}
 
-				<StyledText>{`${item.teacher.firstName} ${item.teacher.lastName}`}</StyledText>
-			</ProfessorWrapper>
+					{/* <ProfileImageWrapper /> */}
 
-			<ClassDateLimitWrapper>
-				<StyledText>{`${item.date} ${item.time}`}</StyledText>
+					<StyledText>{`${item.teacher.firstName} ${item.teacher.lastName}`}</StyledText>
+				</ProfessorWrapper>
 
-				<StyledTextLimit>{`${item.members.length}/10`}</StyledTextLimit>
-			</ClassDateLimitWrapper>
+				<ClassDateLimitWrapper>
+					<StyledText>{`${item.date} ${item.time}`}</StyledText>
 
-			{cardName === CardName.ADMIN ? (
-				<IconWrapper onPress={onDelete}>
-					<Icon name="trash" color={theme.colors.error} />
-				</IconWrapper>
-			) : hasBooked ? (
-				<IconWrapper onPress={() => onBookingType(BookingType.UNBOOK)}>
-					<Icon
-						name="plus-circle"
-						color={theme.colors.error}
-						hasBooked={true}
-					/>
-				</IconWrapper>
-			) : (
-				<IconWrapper onPress={() => onBookingType(BookingType.BOOK)}>
-					<Icon
-						name="plus-circle"
-						color={theme.colors.blue}
-						hasBooked={false}
-					/>
-				</IconWrapper>
-			)}
-		</CardWrapper>
-	);
+					<StyledTextLimit>{`${item.members.length}/10`}</StyledTextLimit>
+				</ClassDateLimitWrapper>
+
+				{cardName === CardName.ADMIN ? (
+					<IconWrapper onPress={onDelete}>
+						<Icon name="trash" color={theme.colors.error} />
+					</IconWrapper>
+				) : hasBooked ? (
+					<IconWrapper onPress={() => onBookingType(BookingType.UNBOOK)}>
+						<Icon
+							name="plus-circle"
+							color={theme.colors.error}
+							hasBooked={true}
+						/>
+					</IconWrapper>
+				) : (
+					<IconWrapper onPress={() => onBookingType(BookingType.BOOK)}>
+						<Icon
+							name="plus-circle"
+							color={theme.colors.blue}
+							hasBooked={false}
+						/>
+					</IconWrapper>
+				)}
+			</CardWrapper>
+		);
+	}
 };
 
 /**
