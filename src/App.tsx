@@ -83,10 +83,7 @@ const errorLink = onError(
 		if (graphQLErrors) {
 			for (let err of graphQLErrors) {
 				switch (err.message) {
-					// Apollo Server sets code to UNAUTHENTICATED
-
-					// when an AuthenticationError is thrown in a resolver
-
+					// when an Expired_Token is thrown in a resolver
 					case 'Expired_Token':
 						// Modify the operation context with a new token
 
@@ -109,12 +106,11 @@ const errorLink = onError(
 										error: observer.error.bind(observer),
 										complete: observer.complete.bind(observer),
 									};
-
 									// Retry last failed request
 									forward(operation).subscribe(subscriber);
 								})
 								.catch(error => {
-									// No refresh or client token available, we force user to login
+									// No refresh or client token available, returns oberserver error
 									observer.error(error);
 								});
 						});
@@ -133,7 +129,7 @@ const errorLink = onError(
 );
 
 const link = createUploadLink({
-	uri: 'http://100.89.10.120:4000/graphql',
+	uri: 'http:///100.89.10.120:4000/graphql',
 });
 
 const client = new ApolloClient({

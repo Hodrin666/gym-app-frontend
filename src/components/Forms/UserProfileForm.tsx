@@ -118,7 +118,7 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 	const lastNameRef = useRef<any>(null);
 	const contactRef = useRef<any>(null);
 
-	const [editGymClassById] = useMutation<
+	const [updateUser] = useMutation<
 		{ updateUser: InputMessage },
 		{ input: IMutationEdit }
 	>(UpdateUser);
@@ -136,7 +136,9 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 				initialValues={initialValues}
 				onSubmit={async values => {
 					if (!isEqual(values, initialValues)) {
-						editGymClassById({
+						console.log('Values', values);
+
+						updateUser({
 							variables: {
 								input: {
 									_id: userAuth?.member._id || '',
