@@ -194,10 +194,12 @@ const EditGymClassById = gql`
 			success
 			message
 			class {
+				_id
 				date
 				description
 				time
 				members
+				_teacherID
 				teacher {
 					firstName
 					lastName
@@ -315,12 +317,26 @@ const Card = (props: IProps): JSX.Element => {
 			},
 			onCompleted: async ({ editGymClassById }) => {
 				console.log('class', editGymClassById.class);
+				const newCard: ICard = {
+					_id: editGymClassById.class._id,
+					_teacherID: editGymClassById.class._teacherID,
+					date: editGymClassById.class.date,
+					time: editGymClassById.class.time,
+					description: editGymClassById.class.description,
+					members: editGymClassById.class.members,
+					teacher: {
+						firstName: editGymClassById.class.teacher.firstname,
+						lastName: editGymClassById.class.teacher.lastname,
+					},
+				};
 				if (editGymClassById.success && type === BookingType.UNBOOK) {
 					setHasBooked(false);
 					Alert.alert('Class', 'Booking removed!', [{ text: 'OK' }]);
+					setCardData(newCard);
 				} else {
 					setHasBooked(true);
 					Alert.alert('Class', 'Booked successfully!', [{ text: 'OK' }]);
+					setCardData(newCard);
 				}
 			},
 			onError: error => {
@@ -338,7 +354,6 @@ const Card = (props: IProps): JSX.Element => {
 	if (loadingImage) {
 		return <AppLoading />;
 	} else {
-		console.log('hello', dataImage);
 		return (
 			<CardWrapper
 				last={last}
