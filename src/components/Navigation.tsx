@@ -4,8 +4,11 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import routes, { landingRoutes } from '../config/routes';
-import React, { FC, useContext } from 'react';
+import routes, {
+	landingRoutesAdminAccess,
+	landingRoutesClientAccess,
+} from '../config/routes';
+import React, { useContext } from 'react';
 import { AuthContext } from '../utils/AuthProvider';
 
 const Stack = createStackNavigator();
@@ -16,7 +19,6 @@ const Stack = createStackNavigator();
 
 const Navigation = (): any => {
 	const { userAuth } = useContext(AuthContext);
-
 	return (
 		<NavigationContainer>
 			{userAuth ? (
@@ -24,11 +26,17 @@ const Navigation = (): any => {
 					initialRouteName="Home"
 					screenOptions={{ headerShown: false }}
 				>
-					{landingRoutes.map((r, i) => (
-						<Stack.Screen key={i} name={r.name}>
-							{props => <r.component nameProp={r.name} {...props} />}
-						</Stack.Screen>
-					))}
+					{userAuth.member.role !== 'member'
+						? landingRoutesAdminAccess.map((r, i) => (
+								<Stack.Screen key={i} name={r.name}>
+									{props => <r.component nameProp={r.name} {...props} />}
+								</Stack.Screen>
+						  ))
+						: landingRoutesClientAccess.map((r, i) => (
+								<Stack.Screen key={i} name={r.name}>
+									{props => <r.component nameProp={r.name} {...props} />}
+								</Stack.Screen>
+						  ))}
 				</Stack.Navigator>
 			) : (
 				<Stack.Navigator

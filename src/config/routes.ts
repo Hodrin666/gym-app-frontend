@@ -26,10 +26,10 @@ const routes: IRouteProps[] = [
 ];
 
 /**
- * Page landing `landingRoutes`.
+ * Page landing `landingRoutesAdminAccess`.
  */
 
-export const landingRoutes: IRouteProps[] = [
+export const landingRoutesAdminAccess: IRouteProps[] = [
 	{
 		name: 'Home',
 		component: HomeScreen,
@@ -37,6 +37,25 @@ export const landingRoutes: IRouteProps[] = [
 	{
 		name: 'TeacherCalendar',
 		component: AddGymClass,
+	},
+	{
+		name: 'MemberCalendar',
+		component: MemberCalendar,
+	},
+	{
+		name: 'Profile',
+		component: Profile,
+	},
+];
+
+/**
+ * Page landing `landingRoutesClientAccess`.
+ */
+
+export const landingRoutesClientAccess: IRouteProps[] = [
+	{
+		name: 'Home',
+		component: HomeScreen,
 	},
 	{
 		name: 'MemberCalendar',

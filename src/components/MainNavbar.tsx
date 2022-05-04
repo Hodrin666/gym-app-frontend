@@ -75,9 +75,13 @@ const MainNavbar: React.FunctionComponent<IProps> = props => {
 				<Icon name={'dumbbell'} size={40} />
 			</TouchableOpacity>
 
-			<TouchableOpacity onPress={() => navigation.navigate('TeacherCalendar')}>
-				<Icon name={'calendar-plus'} size={40} />
-			</TouchableOpacity>
+			{userAuth?.member.role !== 'member' && (
+				<TouchableOpacity
+					onPress={() => navigation.navigate('TeacherCalendar')}
+				>
+					<Icon name={'calendar-plus'} size={40} />
+				</TouchableOpacity>
+			)}
 		</MainNavbarContainer>
 	);
 };
