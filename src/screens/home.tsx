@@ -82,9 +82,12 @@ const HomeScreen: React.FunctionComponent<IStackScreenProps> = props => {
 		Roboto_700Bold,
 	});
 
-	if (loading && !fontsLoaded) {
+	if (loading) {
+		return <AppLoading />;
+	} else if (!fontsLoaded) {
 		return <AppLoading />;
 	} else {
+		console.log('data');
 		return (
 			<HomeContainer>
 				<StatusBar backgroundColor={theme.colors.main} />
