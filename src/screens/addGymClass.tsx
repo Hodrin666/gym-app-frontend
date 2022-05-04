@@ -144,6 +144,7 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 		refetch,
 	} = useQuery(AllClasses, {
 		variables: { first: setSkip },
+		fetchPolicy: 'network-only',
 	});
 
 	if (error) {
@@ -161,87 +162,86 @@ const AddGymClass: React.FunctionComponent<IStackScreenProps> = props => {
 
 	if (loading) {
 		return <ActivityIndicator />;
-	}
+	} else {
+		const dataCount = dataQuery.allClasses.length;
+		return (
+			<Container style={[{ minHeight: Math.round(windowHeight) }]}>
+				<StatusBar style="light" />
 
-	const dataCount = dataQuery.allClasses.length;
-
-	return (
-		<Container style={[{ minHeight: Math.round(windowHeight) }]}>
-			<StatusBar style="light" />
-
-			{dataQuery.allClasses && (
-				<CardContainer>
-					<VirtualizedList<ICard>
-						// Use keyExtractor to help the list optimize performance
-						keyExtractor={item => item._id}
-						data={dataQuery.allClasses}
-						renderItem={({ item, index }) => {
-							if (index === dataCount - 1) {
-								return (
-									<Card
-										item={item}
-										last
-										setOpenEditModal={[setOpenEditModal, setModalVisible]}
-										setCardData={setCardData}
-										refetch={refetch}
-										cardName={CardName.ADMIN}
-									/>
-								);
-							} else {
-								return (
-									<Card
-										item={item}
-										last={false}
-										setOpenEditModal={[setOpenEditModal, setModalVisible]}
-										setCardData={setCardData}
-										refetch={refetch}
-										cardName={CardName.ADMIN}
-									/>
-								);
-							}
-						}}
-						// the virtualized list doesn't know how you want to extract your data
-						// you need to tell it
-						getItem={(data, index) => {
-							const dataIndex = data[index];
-							return dataIndex;
-						}}
-						// it also needs to know how much data you have
-						getItemCount={data => data.length}
-					/>
-				</CardContainer>
-			)}
-
-			<Modal
-				animationType={'fade'}
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={() => {
-					Alert.alert('Modal has been closed.');
-					setModalVisible(!modalVisible);
-					setOpenEditModal(!openEditModal);
-					setCardData(undefined);
-				}}
-			>
-				<ModalF style={[{ minHeight: Math.round(windowHeight) - 200 }]}>
-					{openEditModal && cardData ? (
-						<UpdateSessionForm
-							setModalOpen={[setModalVisible, setOpenEditModal]}
-							refetch={refetch}
-							item={cardData}
-							setCardData={setCardData}
+				{dataQuery.allClasses && (
+					<CardContainer>
+						<VirtualizedList<ICard>
+							// Use keyExtractor to help the list optimize performance
+							keyExtractor={item => item._id}
+							data={dataQuery.allClasses}
+							renderItem={({ item, index }) => {
+								if (index === dataCount - 1) {
+									return (
+										<Card
+											item={item}
+											last
+											setOpenEditModal={[setOpenEditModal, setModalVisible]}
+											setCardData={setCardData}
+											refetch={refetch}
+											cardName={CardName.ADMIN}
+										/>
+									);
+								} else {
+									return (
+										<Card
+											item={item}
+											last={false}
+											setOpenEditModal={[setOpenEditModal, setModalVisible]}
+											setCardData={setCardData}
+											refetch={refetch}
+											cardName={CardName.ADMIN}
+										/>
+									);
+								}
+							}}
+							// the virtualized list doesn't know how you want to extract your data
+							// you need to tell it
+							getItem={(data, index) => {
+								const dataIndex = data[index];
+								return dataIndex;
+							}}
+							// it also needs to know how much data you have
+							getItemCount={data => data.length}
 						/>
-					) : (
-						<SessionForm setModalOpen={setModalVisible} refetch={refetch} />
-					)}
-				</ModalF>
-			</Modal>
-			<Button onPress={() => setModalVisible(true)}>
-				<Icon name={'plus'} size={40} />
-			</Button>
-			<MainNavbar navigation={navigation} />
-		</Container>
-	);
+					</CardContainer>
+				)}
+
+				<Modal
+					animationType={'fade'}
+					transparent={true}
+					visible={modalVisible}
+					onRequestClose={() => {
+						Alert.alert('Modal has been closed.');
+						setModalVisible(!modalVisible);
+						setOpenEditModal(!openEditModal);
+						setCardData(undefined);
+					}}
+				>
+					<ModalF style={[{ minHeight: Math.round(windowHeight) - 200 }]}>
+						{openEditModal && cardData ? (
+							<UpdateSessionForm
+								setModalOpen={[setModalVisible, setOpenEditModal]}
+								refetch={refetch}
+								item={cardData}
+								setCardData={setCardData}
+							/>
+						) : (
+							<SessionForm setModalOpen={setModalVisible} refetch={refetch} />
+						)}
+					</ModalF>
+				</Modal>
+				<Button onPress={() => setModalVisible(true)}>
+					<Icon name={'plus'} size={40} />
+				</Button>
+				<MainNavbar navigation={navigation} />
+			</Container>
+		);
+	}
 };
 
 /**

@@ -69,9 +69,28 @@ export interface InputMessage {
 	message: string;
 	class: {
 		_id: string;
-		members?: string[];
-		teacher: string;
+		_teacherID: string;
+		description: string;
+		members: string[];
+		teacher: {
+			firstname: string;
+			lastname: string;
+		};
+		date: string;
+		time: string;
 	};
+	// class {
+	// 	_id
+	// 	date
+	// 	description
+	// 	time
+	// 	members
+	// 	_teacherID
+	// 	teacher {
+	// 		firstName
+	// 		lastName
+	// 	}
+	// }
 }
 
 /**
@@ -180,10 +199,12 @@ const EditGymClassById = gql`
 			success
 			message
 			class {
+				_id
 				date
 				description
 				time
 				members
+				_teacherID
 				teacher {
 					firstName
 					lastName
@@ -269,6 +290,20 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 					onCompleted: async ({ editGymClassById }) => {
 						if (editGymClassById.success) {
 							Alert.alert('Class', 'Updated successfully!', [{ text: 'OK' }]);
+							console.log('dssdad', editGymClassById);
+							const newCard: ICard = {
+								_id: editGymClassById.class._id,
+								_teacherID: editGymClassById.class._teacherID,
+								date: editGymClassById.class.date,
+								time: editGymClassById.class.time,
+								description: editGymClassById.class.description,
+								members: editGymClassById.class.members,
+								teacher: {
+									firstName: editGymClassById.class.teacher.firstname,
+									lastName: editGymClassById.class.teacher.lastname,
+								},
+							};
+							setCardData(newCard);
 						}
 					},
 					onError: error => {
@@ -367,7 +402,7 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 					}}
 				>
 					<CreateSessionText>
-						{mutationLoading ? 'Loading ' : 'Create Session'}
+						{mutationLoading ? 'Loading ' : 'Update Session'}
 					</CreateSessionText>
 				</CreateSessionButton>
 
