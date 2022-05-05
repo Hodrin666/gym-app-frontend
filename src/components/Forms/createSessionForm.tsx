@@ -12,12 +12,10 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useMutation, gql, useQuery, ApolloQueryResult } from '@apollo/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { RRule } from 'rrule';
 import TextArea from '../TextArea';
 import DropDownPickerComponentTeacher from '../DropDownPickerTeacher';
 import DropDownPickerComponentStudent from '../DropDownPickerStudent';
-import DropDownPickerComponentRepeat from '../DropDownPickerRepeat';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { GetDailyClass } from '../../screens/home';
 
 /**
  * `AndroidMode` type.
@@ -228,7 +226,6 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 		date: '',
 		time: '',
 		members: [],
-		repeat: '',
 		description: '',
 	};
 
@@ -236,12 +233,18 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 		_teacherID: Yup.string().required('Required'),
 		date: Yup.string().required('Required'),
 		time: Yup.string().required('Required'),
-		repeat: Yup.string().required('Required'),
 	});
 
 	const [createGymClass, { loading: mutationLoading, data: mutationData }] =
-		useMutation<{ createGymClass: InputMessage }, { input: SessionFrom }>(
-			CreateGymClass
+		useMutation<{ createGymClass: any }, { input: SessionFrom }>(
+			CreateGymClass,
+			{
+				refetchQueries: () => [
+					{
+						query: GetDailyClass,
+					},
+				],
+			}
 		);
 
 	const {
@@ -256,71 +259,27 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 		initialValues,
 		validationSchema,
 		onSubmit: async values => {
-			const getCurrentYear = new Date().getFullYear();
-			const day = parseInt(values.date.split('/')[1]);
-			const month = parseInt(values.date.split('/')[0]) - 1;
-			const year = parseInt(`20${values.date.split('/')[2]}`);
-			const hour = parseInt(values.time.split(':')[0]);
-			const minutes = parseInt(values.time.split(':')[1]);
-			const date = new Date(Date.UTC(year, month, day, hour, minutes));
-
-			let dates;
-			if (values.repeat === 'DNR') {
-				createGymClass({
-					variables: {
-						input: {
-							_teacherID: values._teacherID,
-							members: values.members,
-							date: values.date,
-							time: values.time,
-							description: values.description,
-						},
+			console.log('fsfsdfs');
+			createGymClass({
+				variables: {
+					input: {
+						_teacherID: values._teacherID,
+						members: values.members,
+						date: values.date,
+						time: values.time,
+						description: values.description,
 					},
-					onCompleted: async ({ createGymClass }) => {
-						if (createGymClass.success) {
-							Alert.alert('Class', 'Inserted!', [{ text: 'OK' }]);
-							await refetch();
-						}
-					},
-					onError: error => {
-						console.log('Error: ', error);
-					},
-				});
-			} else if (values.repeat === 'DAILY') {
-				const rule = new RRule({
-					freq: RRule.DAILY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'WEEKLY') {
-				const rule = new RRule({
-					freq: RRule.WEEKLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'MONTHLY') {
-				const rule = new RRule({
-					freq: RRule.MONTHLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else if (values.repeat === 'YEARLY') {
-				const rule = new RRule({
-					freq: RRule.YEARLY,
-					dtstart: date,
-					until: new Date(Date.UTC(getCurrentYear, 12)),
-				});
-
-				dates = rule.all();
-			} else {
-				console.log('Date not received');
-			}
+				},
+				onCompleted: async ({ createGymClass }) => {
+					if (createGymClass.success) {
+						Alert.alert('Class', 'Inserted!', [{ text: 'OK' }]);
+						await refetch();
+					}
+				},
+				onError: error => {
+					console.log('Error: ', error);
+				},
+			});
 			setModalOpen(false);
 		},
 	});
@@ -390,15 +349,6 @@ const CreateSessionForm = (props: IProps): JSX.Element => {
 						setClose={[setOpenTeacher, setOpenRepeat]}
 						open={openStudent}
 						setOpen={setOpenSudent}
-					/>
-				</DropDownContainer>
-
-				<DropDownContainer>
-					<DropDownPickerComponentRepeat
-						setFieldValue={setFieldValue}
-						setClose={[setOpenTeacher, setOpenTeacher]}
-						open={openRepeat}
-						setOpen={setOpenRepeat}
 					/>
 				</DropDownContainer>
 
