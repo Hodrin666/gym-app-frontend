@@ -4,6 +4,12 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import theme from '../../theme';
 import styled from 'styled-components/native';
 import { ifProp } from 'styled-tools';
+import {
+	useFonts,
+	Roboto_400Regular,
+	Roboto_700Bold,
+} from '@expo-google-fonts/roboto';
+import AppLoading from 'expo-app-loading';
 
 type Ref = RNTextInput;
 
@@ -71,6 +77,15 @@ const TextInput = forwardRef<Ref, any>(
 			: error
 			? theme.colors.error
 			: theme.colors.bright;
+
+		const [fontsLoaded] = useFonts({
+			Roboto_400Regular,
+			Roboto_700Bold,
+		});
+
+		if (!fontsLoaded) {
+			return <AppLoading />;
+		}
 
 		return (
 			<>
