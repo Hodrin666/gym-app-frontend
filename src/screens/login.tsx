@@ -7,7 +7,7 @@ import Logo from '../../assets/logo.svg';
 import { StatusBar } from 'expo-status-bar';
 import styled from 'styled-components/native';
 import theme from '../../theme';
-import { Text, useWindowDimensions } from 'react-native';
+import { Alert, Text, useWindowDimensions } from 'react-native';
 import {
 	useFonts,
 	Roboto_400Regular,
@@ -92,9 +92,18 @@ const RegisterMessageContainer = styled.View`
 	justify-content: center;
 `;
 
+const ErrorSubTitle = styled.Text`
+	font-family: Roboto_400Regular;
+	font-size: 12px;
+	color: ${theme.colors.error};
+	align-self: center;
+	margin-right: 120px;
+`;
+
 const Login: React.FunctionComponent<IStackScreenProps> = props => {
 	const { loginAuth } = useContext(AuthContext);
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [loginMessage, setLoginMessage] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { navigation, route, nameProp } = props;
 	const passwordRef = useRef<any>(null);
 	const [login, { loading }] = useMutation<
@@ -112,15 +121,21 @@ const Login: React.FunctionComponent<IStackScreenProps> = props => {
 			initialValues: initialValues,
 			validationSchema: LoginSchema,
 			onSubmit: async values => {
+				setIsLoading(true);
 				login({
 					variables: {
 						input: { email: values.email, password: values.password },
 					},
 					onCompleted: ({ login }) => {
-						loginAuth(login);
+						if (login.success) {
+							loginAuth(login);
+						}
+						setLoginMessage(login.message);
+						setIsLoading(false);
 					},
 					onError: error => {
 						console.log('Error: ', error);
+						setIsLoading(false);
 					},
 				});
 			},
@@ -180,8 +195,10 @@ const Login: React.FunctionComponent<IStackScreenProps> = props => {
 				last={true}
 			/>
 
+			<ErrorSubTitle>{loginMessage}</ErrorSubTitle>
+
 			<Button
-				label={loading ? 'Loading' : 'Login'}
+				label={isLoading ? 'Loading' : 'Login'}
 				onPress={handleSubmit}
 			></Button>
 
