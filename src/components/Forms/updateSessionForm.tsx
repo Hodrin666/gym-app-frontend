@@ -16,6 +16,7 @@ import DropDownPickerComponentTeacher from '../DropDownPickerTeacher';
 import DropDownPickerComponentStudent from '../DropDownPickerStudent';
 import { ICard } from '../../screens/addGymClass';
 import { isEqual } from 'lodash';
+import { GetDailyClass } from '../../screens/home';
 
 /**
  * `AndroidMode` type.
@@ -261,7 +262,14 @@ const UpdateSessionForm = (props: IProps): JSX.Element => {
 
 	const [editGymClassById, { loading: mutationLoading, data: mutationData }] =
 		useMutation<{ editGymClassById: InputMessage }, { input: IMutationEdit }>(
-			EditGymClassById
+			EditGymClassById,
+			{
+				refetchQueries: () => [
+					{
+						query: GetDailyClass,
+					},
+				],
+			}
 		);
 
 	const {

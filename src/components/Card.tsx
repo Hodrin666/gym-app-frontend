@@ -22,6 +22,7 @@ import { AuthContext } from '../utils/AuthProvider';
 import { useState } from 'react';
 import { IMutationEdit, InputMessage } from './Forms/updateSessionForm';
 import NoImage from '../../assets/user.svg';
+import { GetDailyClass } from '../screens/home';
 
 /**
  * `IProps` interface.
@@ -259,7 +260,13 @@ const Card = (props: IProps): JSX.Element => {
 	const [deleteClassById, { loading, data }] = useMutation<
 		{ deleteClassById: IInputDeleteMessage },
 		{ input: IInputDelete }
-	>(DeleteMutation);
+	>(DeleteMutation, {
+		refetchQueries: () => [
+			{
+				query: GetDailyClass,
+			},
+		],
+	});
 
 	const onDelete = async () => {
 		await deleteClassById({

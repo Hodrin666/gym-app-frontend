@@ -19,7 +19,7 @@ import HeaderNav from '../components/HeaderNav';
 import AppLoading from 'expo-app-loading';
 import SafeAreaView from 'react-native-safe-area-view';
 
-const GetDailyClass = gql`
+export const GetDailyClass = gql`
 	query GetDailyClass {
 		getDailyClass {
 			success
@@ -91,7 +91,6 @@ const HomeScreen: React.FunctionComponent<IStackScreenProps> = props => {
 	} else if (!fontsLoaded) {
 		return <AppLoading />;
 	} else {
-		console.log('Data', data);
 		return (
 			<HomeContainer>
 				<StatusBar backgroundColor={theme.colors.main} />
