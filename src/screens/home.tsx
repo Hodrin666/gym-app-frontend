@@ -22,7 +22,11 @@ import SafeAreaView from 'react-native-safe-area-view';
 const GetDailyClass = gql`
 	query GetDailyClass {
 		getDailyClass {
-			description
+			success
+			message
+			class {
+				description
+			}
 		}
 	}
 `;
@@ -87,7 +91,7 @@ const HomeScreen: React.FunctionComponent<IStackScreenProps> = props => {
 	} else if (!fontsLoaded) {
 		return <AppLoading />;
 	} else {
-		console.log('data');
+		console.log('Data', data);
 		return (
 			<HomeContainer>
 				<StatusBar backgroundColor={theme.colors.main} />
@@ -102,7 +106,9 @@ const HomeScreen: React.FunctionComponent<IStackScreenProps> = props => {
 
 						<WodDescritpionWrapper>
 							<WodDescription style={{ fontFamily: 'Roboto_400Regular' }}>
-								{data.getDailyClass.description}
+								{data.getDailyClass.success
+									? data.getDailyClass.class.description
+									: data.getDailyClass.message}
 							</WodDescription>
 						</WodDescritpionWrapper>
 					</WodWrapper>
